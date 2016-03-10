@@ -11,10 +11,7 @@
  */
 #define LZ4_MEM_COMPRESS	(4096 * sizeof(unsigned char *))
 #define LZ4HC_MEM_COMPRESS	(65538 * sizeof(unsigned char *))
-<<<<<<< HEAD
 #define LZ4_E_OK 0
-=======
->>>>>>> 0d7f80b86b28722f2b5ef5fd010daf72b8ad5ad2
 
 /*
  * lz4_compressbound()

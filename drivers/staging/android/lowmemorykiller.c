@@ -127,22 +127,14 @@ static void dump_tasks_info(void)
 }
 #endif
 
-<<<<<<< HEAD
 /*#ifdef CONFIG_ZRAM
-=======
-#ifdef CONFIG_ZRAM
->>>>>>> 0d7f80b86b28722f2b5ef5fd010daf72b8ad5ad2
 extern ssize_t zram_mem_free_percent(void);
 
 int cacl_zram_score_adj(void)
 {
     return (int)(zram_mem_free_percent()*OOM_SCORE_ADJ_MAX/100);
 }
-<<<<<<< HEAD
 #endif*/
-=======
-#endif
->>>>>>> 0d7f80b86b28722f2b5ef5fd010daf72b8ad5ad2
 
 static int test_task_flag(struct task_struct *p, int flag)
 {
@@ -188,15 +180,9 @@ static int lowmem_shrink(struct shrinker *s, struct shrink_control *sc)
 	int other_free = global_page_state(NR_FREE_PAGES) - totalreserve_pages;
 	int other_file = global_page_state(NR_FILE_PAGES) -
 						global_page_state(NR_SHMEM);
-<<<<<<< HEAD
 /*#ifdef CONFIG_ZRAM
 	int zram_score_adj = 0;
 #endif*/
-=======
-#ifdef CONFIG_ZRAM
-	int zram_score_adj = 0;
-#endif
->>>>>>> 0d7f80b86b28722f2b5ef5fd010daf72b8ad5ad2
 #ifdef CONFIG_SEC_DEBUG_LMK_MEMINFO
 	static DEFINE_RATELIMIT_STATE(lmk_rs, DEFAULT_RATELIMIT_INTERVAL, 1);
 #endif
@@ -238,11 +224,7 @@ static int lowmem_shrink(struct shrinker *s, struct shrink_control *sc)
 		return rem;
 	}
 
-<<<<<<< HEAD
 /*#if defined(CONFIG_ZRAM) && !defined(CONFIG_RUNTIME_COMPCACHE)
-=======
-#if defined(CONFIG_ZRAM) && !defined(CONFIG_RUNTIME_COMPCACHE)
->>>>>>> 0d7f80b86b28722f2b5ef5fd010daf72b8ad5ad2
 	zram_score_adj = cacl_zram_score_adj();
 	printk("ZRAM: min_score_adj:%d, zram_score_adj:%d\r\n", min_score_adj, zram_score_adj);
 	if(min_score_adj < zram_score_adj)
@@ -250,11 +232,7 @@ static int lowmem_shrink(struct shrinker *s, struct shrink_control *sc)
 		return rem;
 	}
 	min_score_adj = zram_score_adj;
-<<<<<<< HEAD
 #endif*/
-=======
-#endif
->>>>>>> 0d7f80b86b28722f2b5ef5fd010daf72b8ad5ad2
 #ifdef ENHANCED_LMK_ROUTINE
 	for (i = 0; i < LOWMEM_DEATHPENDING_DEPTH; i++)
 		selected_oom_score_adj[i] = min_score_adj;
@@ -298,19 +276,11 @@ static int lowmem_shrink(struct shrinker *s, struct shrink_control *sc)
 			task_unlock(p);
 			continue;
 		}
-<<<<<<< HEAD
 /*#if defined(CONFIG_ZRAM) && !defined(CONFIG_RUNTIME_COMPCACHE)
 		tasksize = get_mm_rss(p->mm) + get_mm_counter(p->mm, MM_SWAPENTS);
 #else*/
 		tasksize = get_mm_rss(p->mm);
 //#endif
-=======
-#if defined(CONFIG_ZRAM) && !defined(CONFIG_RUNTIME_COMPCACHE)
-		tasksize = get_mm_rss(p->mm) + get_mm_counter(p->mm, MM_SWAPENTS);
-#else
-		tasksize = get_mm_rss(p->mm);
-#endif
->>>>>>> 0d7f80b86b28722f2b5ef5fd010daf72b8ad5ad2
 		task_unlock(p);
 		if (tasksize <= 0)
 			continue;

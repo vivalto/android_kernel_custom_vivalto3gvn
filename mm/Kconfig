@@ -506,12 +506,8 @@ config ZBUD
 config ZSWAP
 	bool "Compressed cache for swap pages (EXPERIMENTAL)"
 	depends on FRONTSWAP && CRYPTO=y
-<<<<<<< HEAD
 	select CRYPTO_LZ4
 	select CRYPTO_LZ4HC
-=======
-	select CRYPTO_LZO
->>>>>>> 0d7f80b86b28722f2b5ef5fd010daf72b8ad5ad2
 	select ZBUD
 	default n
 	help
