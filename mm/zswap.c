@@ -75,7 +75,11 @@ static u64 zswap_duplicate_entry;
 /*********************************
 * tunables
 **********************************/
+<<<<<<< HEAD
 /* Enable/disable zswap (enabled by default) */
+=======
+/* Enable/disable zswap (disabled by default) */
+>>>>>>> 0d7f80b86b28722f2b5ef5fd010daf72b8ad5ad2
 static bool zswap_enabled __read_mostly;
 module_param_named(enabled, zswap_enabled, bool, 0);
 

@@ -11,7 +11,11 @@
  *
  * Project home: http://compcache.googlecode.com/
  */
+<<<<<<< HEAD
 
+=======
+#include <linux/module.h>
+>>>>>>> 0d7f80b86b28722f2b5ef5fd010daf72b8ad5ad2
 #include <linux/device.h>
 #include <linux/genhd.h>
 #include <linux/mm.h>
@@ -30,9 +34,24 @@ static u64 zram_stat64_read(struct zram *zram, u64 *v)
 	return val;
 }
 
+<<<<<<< HEAD
 static inline struct zram *dev_to_zram(struct device *dev)
 {
 	return (struct zram *)dev_to_disk(dev)->private_data;
+=======
+static struct zram *dev_to_zram(struct device *dev)
+{
+	int i;
+	struct zram *zram = NULL;
+
+	for (i = 0; i < zram_get_num_devices(); i++) {
+		zram = &zram_devices[i];
+		if (disk_to_dev(zram->disk) == dev)
+			break;
+	}
+
+	return zram;
+>>>>>>> 0d7f80b86b28722f2b5ef5fd010daf72b8ad5ad2
 }
 
 static ssize_t disksize_show(struct device *dev,
@@ -47,21 +66,40 @@ static ssize_t disksize_store(struct device *dev,
 		struct device_attribute *attr, const char *buf, size_t len)
 {
 	u64 disksize;
+<<<<<<< HEAD
+=======
+	struct zram_meta *meta;
+>>>>>>> 0d7f80b86b28722f2b5ef5fd010daf72b8ad5ad2
 	struct zram *zram = dev_to_zram(dev);
 
 	disksize = memparse(buf, NULL);
 	if (!disksize)
 		return -EINVAL;
 
+<<<<<<< HEAD
 	down_write(&zram->init_lock);
 	if (zram->init_done) {
 		up_write(&zram->init_lock);
+=======
+	disksize = PAGE_ALIGN(disksize);
+	meta = zram_meta_alloc(disksize);
+	down_write(&zram->init_lock);
+	if (zram->init_done) {
+		up_write(&zram->init_lock);
+		zram_meta_free(meta);
+>>>>>>> 0d7f80b86b28722f2b5ef5fd010daf72b8ad5ad2
 		pr_info("Cannot change disksize for initialized device\n");
 		return -EBUSY;
 	}
 
+<<<<<<< HEAD
 	zram->disksize = PAGE_ALIGN(disksize);
 	set_capacity(zram->disk, zram->disksize >> SECTOR_SHIFT);
+=======
+	zram->disksize = disksize;
+	set_capacity(zram->disk, zram->disksize >> SECTOR_SHIFT);
+	zram_init_device(zram, meta);
+>>>>>>> 0d7f80b86b28722f2b5ef5fd010daf72b8ad5ad2
 	up_write(&zram->init_lock);
 
 	return len;
@@ -75,6 +113,7 @@ static ssize_t initstate_show(struct device *dev,
 	return sprintf(buf, "%u\n", zram->init_done);
 }
 
+<<<<<<< HEAD
 static inline ssize_t initstate_store(struct device *dev,
 				      struct device_attribute *attr,
 				      const char *buf, size_t len)
@@ -82,6 +121,8 @@ static inline ssize_t initstate_store(struct device *dev,
 	return 0;
 }
 
+=======
+>>>>>>> 0d7f80b86b28722f2b5ef5fd010daf72b8ad5ad2
 static ssize_t reset_store(struct device *dev,
 		struct device_attribute *attr, const char *buf, size_t len)
 {
@@ -108,11 +149,15 @@ static ssize_t reset_store(struct device *dev,
 	if (bdev)
 		fsync_bdev(bdev);
 
+<<<<<<< HEAD
 	down_write(&zram->init_lock);
 	if (zram->init_done)
 		__zram_reset_device(zram);
 	up_write(&zram->init_lock);
 
+=======
+	zram_reset_device(zram);
+>>>>>>> 0d7f80b86b28722f2b5ef5fd010daf72b8ad5ad2
 	return len;
 }
 
@@ -183,19 +228,102 @@ static ssize_t mem_used_total_show(struct device *dev,
 {
 	u64 val = 0;
 	struct zram *zram = dev_to_zram(dev);
+<<<<<<< HEAD
 
 	down_read(&zram->init_lock);
 	if (zram->init_done) {
 		val = zs_get_total_size_bytes(zram->mem_pool);
 	}
+=======
+	struct zram_meta *meta = zram->meta;
+
+	down_read(&zram->init_lock);
+	if (zram->init_done)
+		val = zs_get_total_size_bytes(meta->mem_pool);
+>>>>>>> 0d7f80b86b28722f2b5ef5fd010daf72b8ad5ad2
 	up_read(&zram->init_lock);
 
 	return sprintf(buf, "%llu\n", val);
 }
 
+<<<<<<< HEAD
 static DEVICE_ATTR(disksize, S_IRUGO | S_IWUSR,
 		disksize_show, disksize_store);
 static DEVICE_ATTR(initstate, S_IRUGO | S_IWUSR, initstate_show, initstate_store);
+=======
+static uint32_t total_mem_usage_percent = 30;
+module_param_named(total_mem_usage_percent, total_mem_usage_percent, uint, S_IRUGO | S_IWUSR);
+
+static ssize_t mem_free_percent(void)
+{
+	unsigned long mem_used_pages = 0;
+	u64 val = 0;
+	int i = 0;
+	struct zram *zram = NULL;
+	struct zram_meta *meta = NULL;
+	unsigned long total_zram_pages = totalram_pages*total_mem_usage_percent/100;
+
+	for (i = 0; i < zram_get_num_devices(); i++) {
+
+		zram = &zram_devices[i];
+		if(!zram || !zram->init_done || !zram->disk)
+		{
+			continue;
+		}
+
+		down_read(&zram->lock);
+
+		meta = zram->meta;
+		if (meta && meta->mem_pool)
+		{
+			val += zs_get_total_size_bytes(meta->mem_pool);
+		}
+
+		up_read(&zram->lock);
+	}
+
+	mem_used_pages = val >> PAGE_SHIFT;
+
+	pr_debug("ZRAM:totalram_pages:%lu,total_zram_pages:%lu,mem_used_pages:%lu\r\n", totalram_pages, total_zram_pages,mem_used_pages);
+
+	return (mem_used_pages >= total_zram_pages) ? 0 : ((total_zram_pages - mem_used_pages)*100/total_zram_pages);
+}
+
+
+static ssize_t mem_free_total(void)
+{
+	//zram average compress ratio 40%
+	ssize_t zram_free_pages = totalram_pages*total_mem_usage_percent * mem_free_percent()*5 /20000;
+	ssize_t total_anon_pages = global_page_state(NR_ACTIVE_ANON) + global_page_state(NR_INACTIVE_ANON);
+
+	pr_debug("%s: zram_free_pages:%d, total_anon_pages:%d\r\n", __func__, zram_free_pages, total_anon_pages);
+
+	return (zram_free_pages < total_anon_pages) ? zram_free_pages : total_anon_pages;
+}
+
+
+static ssize_t mem_free_percent_show(struct device *dev,
+		struct device_attribute *attr, char *buf)
+{
+	ssize_t free_percent = mem_free_percent();
+	printk("%s, percent:%d\r\n", __func__, free_percent);
+	return sprintf(buf, "%d\n", free_percent);
+}
+
+static ssize_t mem_free_total_show(struct device *dev,
+		struct device_attribute *attr, char *buf)
+{
+	ssize_t  free_total  = mem_free_total();
+	printk("%s, percent:%d\r\n", __func__, free_total);
+	return sprintf(buf, "%d\n", free_total);
+}
+
+
+
+static DEVICE_ATTR(disksize, S_IRUGO | S_IWUSR,
+		disksize_show, disksize_store);
+static DEVICE_ATTR(initstate, S_IRUGO, initstate_show, NULL);
+>>>>>>> 0d7f80b86b28722f2b5ef5fd010daf72b8ad5ad2
 static DEVICE_ATTR(reset, S_IWUSR, NULL, reset_store);
 static DEVICE_ATTR(num_reads, S_IRUGO, num_reads_show, NULL);
 static DEVICE_ATTR(num_writes, S_IRUGO, num_writes_show, NULL);
@@ -205,6 +333,11 @@ static DEVICE_ATTR(zero_pages, S_IRUGO, zero_pages_show, NULL);
 static DEVICE_ATTR(orig_data_size, S_IRUGO, orig_data_size_show, NULL);
 static DEVICE_ATTR(compr_data_size, S_IRUGO, compr_data_size_show, NULL);
 static DEVICE_ATTR(mem_used_total, S_IRUGO, mem_used_total_show, NULL);
+<<<<<<< HEAD
+=======
+static DEVICE_ATTR(mem_free_percent, S_IRUGO, mem_free_percent_show, NULL);
+static DEVICE_ATTR(mem_free_total, S_IRUGO, mem_free_total_show, NULL);
+>>>>>>> 0d7f80b86b28722f2b5ef5fd010daf72b8ad5ad2
 
 static struct attribute *zram_disk_attrs[] = {
 	&dev_attr_disksize.attr,
@@ -218,9 +351,23 @@ static struct attribute *zram_disk_attrs[] = {
 	&dev_attr_orig_data_size.attr,
 	&dev_attr_compr_data_size.attr,
 	&dev_attr_mem_used_total.attr,
+<<<<<<< HEAD
+=======
+	&dev_attr_mem_free_percent.attr,
+	&dev_attr_mem_free_total.attr,
+>>>>>>> 0d7f80b86b28722f2b5ef5fd010daf72b8ad5ad2
 	NULL,
 };
 
 struct attribute_group zram_disk_attr_group = {
 	.attrs = zram_disk_attrs,
 };
+<<<<<<< HEAD
+=======
+
+
+ssize_t zram_mem_free_percent(void)
+{
+	return mem_free_percent();
+}
+>>>>>>> 0d7f80b86b28722f2b5ef5fd010daf72b8ad5ad2
