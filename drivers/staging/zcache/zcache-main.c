@@ -72,11 +72,12 @@ static inline void frontswap_tmem_exclusive_gets(bool b)
 /* enable (or fix code) when Seth's patches are accepted upstream */
 #define zcache_writeback_enabled 0
 
-static bool zcache_enabled __read_mostly;
-static bool disable_cleancache __read_mostly;
-static bool disable_frontswap __read_mostly;
-static bool disable_frontswap_ignore_nonactive __read_mostly;
-static bool disable_cleancache_ignore_nonactive __read_mostly;
+static bool zcache_enabled = true;
+module_param_named(enabled, zcache_enabled, bool, 0644);
+static bool disable_cleancache;
+static bool disable_frontswap;
+static bool disable_frontswap_ignore_nonactive;
+static bool disable_cleancache_ignore_nonactive;
 static char *namestr __read_mostly = "zcache";
 
 #define ZCACHE_GFP_MASK \
@@ -87,7 +88,7 @@ static char *namestr __read_mostly = "zcache";
 static char *zcache_comp_name = "lzo";
 #else
 #define ZCACHE_COMP_NAME_SZ CRYPTO_MAX_ALG_NAME
-static char zcache_comp_name[ZCACHE_COMP_NAME_SZ] __read_mostly;
+static char *zcache_comp_name[ZCACHE_COMP_NAME_SZ];
 #endif
 static struct crypto_comp * __percpu *zcache_comp_pcpu_tfms __read_mostly;
 

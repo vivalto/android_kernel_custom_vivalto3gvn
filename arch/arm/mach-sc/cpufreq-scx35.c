@@ -166,16 +166,14 @@ static unsigned int get_mcu_clk_freq(void)
 
 static struct cpufreq_table_data sc8830_cpufreq_table_data_cs = {
 	.freq_tbl = {
-		{0, 1500000},
-		{1, 1400000},
-		{2, 1200000},
-		{3, 1000000},
-		{4, SHARK_TDPLL_FREQUENCY},
-		{5, 600000},
-		{6, CPUFREQ_TABLE_END},
+		{0, 1400000},
+		{1, 1200000},
+		{2, 1000000},
+		{3, SHARK_TDPLL_FREQUENCY},
+		{4, 600000},
+		{5, CPUFREQ_TABLE_END},
 	},
 	.vddarm_mv = {
-		1370000,
 		1350000,
 		1250000,
 		1150000,
@@ -195,17 +193,15 @@ for 7715 test
 // it uses 1.2G overclock screening AP chip among 1.0G AP chip
  static struct cpufreq_table_data sc7715_overclk_cpufreq_table_data = {
 	.freq_tbl = {
-		{0, 1500000},
-		{1, 1400000},
-		{2, 1200000},
-		{3, 1000000},
-		{4, SHARK_TDPLL_FREQUENCY},
-		{5, 600000},
-		{6, SHARK_TDPLL_FREQUENCY/2},
-		{7, CPUFREQ_TABLE_END},
+		{0, 1400000},
+		{1, 1200000},
+		{2, 1000000},
+		{3, SHARK_TDPLL_FREQUENCY},
+		{4, 600000},
+		{5, SHARK_TDPLL_FREQUENCY/2},
+		{6, CPUFREQ_TABLE_END},
 	},
 	.vddarm_mv = {
-		1370000,
 		1350000,
 		1320000,
 		1200000,
