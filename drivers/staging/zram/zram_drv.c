@@ -35,18 +35,18 @@
 #include <linux/vmalloc.h>
 
 #include "zram_drv.h"
-#if defined(CONFIG_ZRAM_LZ4)
+/*#if defined(CONFIG_ZRAM_LZ4)
 #define ZRAM_COMPRESSOR_DEFAULT "lz4"
-#elif defined(CONFIG_ZRAM_LZO)
-#define ZRAM_COMPRESSOR_DEFAULT "lzo"
-#endif
+#elif defined(CONFIG_ZRAM_LZO)*/
+#define ZRAM_COMPRESSOR_DEFAULT "lz4"
+//#endif
 
 /* Globals */
 static int zram_major;
 struct zram *zram_devices;
 
 /* Module params (documentation at end) */
-static unsigned int num_devices = 3;
+static unsigned int num_devices = 1;
 
 static void zram_stat_inc(u32 *v)
 {
