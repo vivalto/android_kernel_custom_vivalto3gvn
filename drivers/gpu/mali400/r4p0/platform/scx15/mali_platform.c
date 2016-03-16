@@ -36,7 +36,7 @@
 #include "base.h"
 
 #define GPU_GLITCH_FREE_DFS 0
-#define GPU_FIX_300MHZ	1
+#define GPU_FIX_312MHZ	1
 
 #define GPU_MIN_DIVISION	1
 #define GPU_MAX_DIVISION	1
@@ -51,7 +51,7 @@
 #define GPU_SELECT2_MAX		284000
 #define GPU_SELECT2_MIN		(GPU_SELECT1_MAX/GPU_MAX_DIVISION)
 #define GPU_SELECT3_VAL		3
-#define GPU_SELECT3_MAX		300000
+#define GPU_SELECT3_MAX		312000
 #define GPU_SELECT3_MIN		(GPU_SELECT1_MAX/GPU_MAX_DIVISION)
 
 #define MAX(x,y)	({typeof(x) _x = (x); typeof(y) _y = (y); (void) (&_x == &_y); _x > _y ? _x : _y;})
@@ -67,7 +67,7 @@ extern int gpu_level;
 static struct clk* gpu_clock = NULL;
 static struct clk* gpu_clock_i = NULL;
 static struct clk* clock_256m = NULL;
-static struct clk* clock_300m = NULL;
+static struct clk* clock_312m = NULL;
 static int max_div = GPU_MAX_DIVISION;
 static int min_div = GPU_MIN_DIVISION;
 static int mali_freq_select = 1;
@@ -121,21 +121,21 @@ void mali_power_initialize(struct platform_device *pdev)
 	gpu_clock = of_clk_get(np, 2) ;
 	gpu_clock_i = of_clk_get(np, 1) ;
 	clock_256m = of_clk_get(np, 0) ;
-	clock_300m = of_clk_get(np, 3) ;
+	clock_312m = of_clk_get(np, 3) ;
 	if (!gpu_clock)
 		MALI_DEBUG_PRINT(2, ("%s, cant get gpu_clock\n", __FUNCTION__));
 	if (!gpu_clock_i)
 		MALI_DEBUG_PRINT(2, ("%s, cant get gpu_clock_i\n", __FUNCTION__));
 	if (!clock_256m)
 		MALI_DEBUG_PRINT(2, ("%s, cant get clock_256m\n", __FUNCTION__));
-	if (!clock_300m)
-		MALI_DEBUG_PRINT(2, ("%s, cant get clock_300m\n", __FUNCTION__));
+	if (!clock_312m)
+		MALI_DEBUG_PRINT(2, ("%s, cant get clock_312m\n", __FUNCTION__));
 
 #else
 	gpu_clock = clk_get(NULL, "clk_gpu");
 	gpu_clock_i = clk_get(NULL, "clk_gpu_i");
 	clock_256m = clk_get(NULL, "clk_256m");
-	clock_300m = clk_get(NULL, "clk_300m");
+	clock_312m = clk_get(NULL, "clk_312m");
 #endif
 
 	gpu_max_freq=GPU_SELECT1_MAX;
@@ -143,7 +143,7 @@ void mali_power_initialize(struct platform_device *pdev)
 	MALI_DEBUG_ASSERT(gpu_clock);
 	MALI_DEBUG_ASSERT(gpu_clock_i);
 	MALI_DEBUG_ASSERT(clock_256m);
-	MALI_DEBUG_ASSERT(clock_300m);
+	MALI_DEBUG_ASSERT(clock_312m);
 
 	if(!gpu_power_on)
 	{
@@ -420,7 +420,7 @@ void mali_platform_utilization(struct mali_gpu_utilization_data *data)
 			break;
 		case 2:
 			gpu_max_freq=GPU_SELECT1_MAX;
-#if GPU_FIX_300MHZ
+#if GPU_FIX_312MHZ
 			mali_get_freq_select(gpufreq_max_limit,&mali_freq_select,GPU_SELECT3_VAL);
 #else
 			mali_get_freq_select(gpufreq_max_limit,&mali_freq_select,GPU_SELECT1_VAL);
@@ -442,12 +442,12 @@ void mali_platform_utilization(struct mali_gpu_utilization_data *data)
 		case 0:
 		case 1:
 		default:
-#if GPU_FIX_300MHZ
+#if GPU_FIX_312MHZ
 			mali_get_freq_select(gpufreq_max_limit,&mali_freq_select,GPU_SELECT3_VAL);
 #else
 			mali_get_freq_select(gpufreq_max_limit,&mali_freq_select,GPU_SELECT1_VAL);
 #endif
-			//if gpu frquency select 300MHz, DFS will be disabled
+			//if gpu frquency select 312MHz, DFS will be disabled
 			//if gpu frquency select 256MHz, DFS will be enabled
 			if(GPU_SELECT3_VAL==mali_freq_select)
 			{
@@ -543,7 +543,7 @@ static void gpufreq_limit_init(void)
 		freq_table_data.freq_tbl[i].division=0;
 		freq_table_data.freq_tbl[i].freq_select=0;
 		}
-#if GPU_FIX_300MHZ
+#if GPU_FIX_312MHZ
 	freq_table_data.freq_tbl[0].index=0;
 	freq_table_data.freq_tbl[0].frequency=GPU_SELECT3_MAX;
 	freq_table_data.freq_tbl[0].division=1;
@@ -646,7 +646,7 @@ static void gpu_change_freq_div(void)
 			{
 				case 3:
 					gpu_max_freq=GPU_SELECT3_MAX;
-					clk_set_parent(gpu_clock,clock_300m);
+					clk_set_parent(gpu_clock,clock_312m);
 					break;
 				case 0:
 				case 1:

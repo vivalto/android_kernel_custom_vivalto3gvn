@@ -84,12 +84,12 @@ static char *namestr __read_mostly = "zcache";
 	(__GFP_FS | __GFP_NORETRY | __GFP_NOWARN | __GFP_NOMEMALLOC)
 
 /* crypto API for zcache  */
-#ifdef CONFIG_ZCACHE_MODULE
-static char *zcache_comp_name = "lzo";
-#else
+//#ifdef CONFIG_ZCACHE_MODULE
+static char *zcache_comp_name = "lz4";
+/*#else
 #define ZCACHE_COMP_NAME_SZ CRYPTO_MAX_ALG_NAME
 static char *zcache_comp_name[ZCACHE_COMP_NAME_SZ];
-#endif
+#endif*/
 static struct crypto_comp * __percpu *zcache_comp_pcpu_tfms __read_mostly;
 
 enum comp_op {

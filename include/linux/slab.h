@@ -81,6 +81,10 @@
 /* The following flags affect the page allocator grouping pages by mobility */
 #define SLAB_RECLAIM_ACCOUNT	0x00020000UL		/* Objects are reclaimable */
 #define SLAB_TEMPORARY		SLAB_RECLAIM_ACCOUNT	/* Objects are short-lived */
+
+/* Following flags should only be used by allocator specific flags */
+#define SLAB_ALLOC_PRIVATE      0x000000ffUL
+
 /*
  * ZERO_SIZE_PTR will be returned for zero sized kmalloc requests.
  *
@@ -280,6 +284,8 @@ static __always_inline int kmalloc_index(size_t size)
 #include <linux/slab_def.h>
 #elif defined(CONFIG_SLUB)
 #include <linux/slub_def.h>
+#elif defined(CONFIG_SLQB)
+#include <linux/slqb_def.h>
 #else
 #error "Unknown slab allocator"
 #endif
@@ -462,7 +468,7 @@ static inline void *kmem_cache_alloc_node(struct kmem_cache *cachep,
  * allocator where we care about the real place the memory allocation
  * request comes from.
  */
-#if defined(CONFIG_DEBUG_SLAB) || defined(CONFIG_SLUB) || \
+#if defined(CONFIG_DEBUG_SLAB) || defined(CONFIG_SLUB) || defined(CONFIG_SLQB_DEBUG) || \
 	(defined(CONFIG_SLAB) && defined(CONFIG_TRACING)) || \
 	(defined(CONFIG_SLOB) && defined(CONFIG_TRACING))
 extern void *__kmalloc_track_caller(size_t, gfp_t, unsigned long);
@@ -482,7 +488,7 @@ extern void *__kmalloc_track_caller(size_t, gfp_t, unsigned long);
  * standard allocator where we care about the real place the memory
  * allocation request comes from.
  */
-#if defined(CONFIG_DEBUG_SLAB) || defined(CONFIG_SLUB) || \
+#if defined(CONFIG_DEBUG_SLAB) || defined(CONFIG_SLUB) || defined(CONFIG_SLQB_DEBUG) || \
 	(defined(CONFIG_SLAB) && defined(CONFIG_TRACING)) || \
 	(defined(CONFIG_SLOB) && defined(CONFIG_TRACING))
 extern void *__kmalloc_node_track_caller(size_t, gfp_t, int, unsigned long);

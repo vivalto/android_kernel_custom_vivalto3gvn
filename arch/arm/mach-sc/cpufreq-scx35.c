@@ -50,7 +50,7 @@
 
 #define FREQ_TABLE_SIZE 	10
 #define DVFS_BOOT_TIME	(30 * HZ)
-#define SHARK_TDPLL_FREQUENCY	(768000)
+#define SHARK_TDPLL_FREQUENCY	(1000000)
 #define TRANSITION_LATENCY	(100 * 1000) /* ns */
 
 static DEFINE_MUTEX(freq_lock);
@@ -168,17 +168,15 @@ static struct cpufreq_table_data sc8830_cpufreq_table_data_cs = {
 	.freq_tbl = {
 		{0, 1400000},
 		{1, 1200000},
-		{2, 1000000},
-		{3, SHARK_TDPLL_FREQUENCY},
-		{4, 600000},
-		{5, CPUFREQ_TABLE_END},
+		{2, SHARK_TDPLL_FREQUENCY},
+		{3, SHARK_TDPLL_FREQUENCY/2},
+		{4, CPUFREQ_TABLE_END},
 	},
 	.vddarm_mv = {
 		1350000,
 		1250000,
 		1150000,
 		1100000,
-		1050000,
 		1000000,
 	},
 };
@@ -195,18 +193,14 @@ for 7715 test
 	.freq_tbl = {
 		{0, 1400000},
 		{1, 1200000},
-		{2, 1000000},
-		{3, SHARK_TDPLL_FREQUENCY},
-		{4, 600000},
-		{5, SHARK_TDPLL_FREQUENCY/2},
-		{6, CPUFREQ_TABLE_END},
+		{2, SHARK_TDPLL_FREQUENCY},
+		{3, SHARK_TDPLL_FREQUENCY/2},
+		{4, CPUFREQ_TABLE_END},
 	},
 	.vddarm_mv = {
 		1350000,
 		1320000,
 		1200000,
-		1150000,
-		1100000,
 		1100000,
 		1000000,
 	},
@@ -428,7 +422,7 @@ static int sprd_cpufreq_verify_speed(struct cpufreq_policy *policy)
 }
 
 int cpufreq_min_limit = 600000;
-int cpufreq_max_limit = 1500000;
+int cpufreq_max_limit = 1400000;
 static DEFINE_SPINLOCK(cpufreq_state_lock);
 
 static int sprd_cpufreq_target(struct cpufreq_policy *policy,
