@@ -78,10 +78,10 @@ static int lowmem_adj[6] = {
 };
 static int lowmem_adj_size = 4;
 static int lowmem_minfree[6] = {
-	3 * 512,	/* 6MB */
+	1 * 512,	/* 2MB */
+	1 * 1024,	/* 4MB */
 	2 * 1024,	/* 8MB */
 	4 * 1024,	/* 16MB */
-	16 * 1024,	/* 64MB */
 };
 static int lowmem_minfree_size = 4;
 
@@ -180,9 +180,9 @@ static int lowmem_shrink(struct shrinker *s, struct shrink_control *sc)
 	int other_free = global_page_state(NR_FREE_PAGES) - totalreserve_pages;
 	int other_file = global_page_state(NR_FILE_PAGES) -
 						global_page_state(NR_SHMEM);
-/*#ifdef CONFIG_ZRAM
+#ifdef CONFIG_ZRAM
 	int zram_score_adj = 0;
-#endif*/
+#endif
 #ifdef CONFIG_SEC_DEBUG_LMK_MEMINFO
 	static DEFINE_RATELIMIT_STATE(lmk_rs, DEFAULT_RATELIMIT_INTERVAL, 1);
 #endif
@@ -276,11 +276,11 @@ static int lowmem_shrink(struct shrinker *s, struct shrink_control *sc)
 			task_unlock(p);
 			continue;
 		}
-/*#if defined(CONFIG_ZRAM) && !defined(CONFIG_RUNTIME_COMPCACHE)
+#if defined(CONFIG_ZRAM) && !defined(CONFIG_RUNTIME_COMPCACHE)
 		tasksize = get_mm_rss(p->mm) + get_mm_counter(p->mm, MM_SWAPENTS);
-#else*/
+#else
 		tasksize = get_mm_rss(p->mm);
-//#endif
+#endif
 		task_unlock(p);
 		if (tasksize <= 0)
 			continue;

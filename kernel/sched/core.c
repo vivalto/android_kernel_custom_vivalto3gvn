@@ -89,6 +89,8 @@
 #define CREATE_TRACE_POINTS
 #include <trace/events/sched.h>
 
+ATOMIC_NOTIFIER_HEAD(migration_notifier_head);
+
 #ifdef CONFIG_SPRD_DEBUG
 #include <mach/sprd_debug.h>
 #endif
