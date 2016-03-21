@@ -1507,7 +1507,9 @@ static ssize_t enable_store(struct device *pdev, struct device_attribute *attr,
 #endif
 
 	mutex_lock(&dev->mutex);
+#ifdef CONFIG_SPRD_USB_DEVICE_ONLY
 	usb_first_enable_store_flag();
+#endif
 	sscanf(buff, "%d", &enabled);
 	NPRINTK("Enable(%d)\n", enabled);
 	if (enabled && !dev->enabled) {

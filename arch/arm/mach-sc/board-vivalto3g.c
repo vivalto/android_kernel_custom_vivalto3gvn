@@ -827,7 +827,6 @@ void sec_charger_cb(u8 cable_type)
 		value.intval = current_cable_type;
 		psy->set_property(psy, POWER_SUPPLY_PROP_ONLINE, &value);
 	}
-
 	if (current_cable_type == POWER_SUPPLY_TYPE_USB) {
 		epmic_event_handler(1);
 	}
