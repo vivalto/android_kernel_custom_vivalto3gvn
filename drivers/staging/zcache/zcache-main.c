@@ -32,7 +32,7 @@
 #include <linux/frontswap.h>
 #include "tmem.h"
 #include "zcache.h"
-#include "zbud.h"
+#include <linux/zbud.h>
 #include "ramster.h"
 #include "debug.h"
 #ifdef CONFIG_RAMSTER

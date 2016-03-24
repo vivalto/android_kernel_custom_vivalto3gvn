@@ -1149,6 +1149,7 @@ decrypt_pki_encrypted_session_key(struct ecryptfs_auth_tok *auth_tok,
 	struct ecryptfs_msg_ctx *msg_ctx;
 	struct ecryptfs_message *msg = NULL;
 	char *auth_tok_sig = NULL;
+	char *auth_tok_sig;
 	char *payload = NULL;
 	size_t payload_len = 0;
 	int rc;
@@ -1207,7 +1208,8 @@ out:
 	if (auth_tok_sig)
         kfree(auth_tok_sig);
 	if (payload)
-        kfree(payload);
+	kfree(msg);
+	kfree(payload);
 	return rc;
 }
 
