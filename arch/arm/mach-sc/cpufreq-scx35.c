@@ -421,8 +421,8 @@ static int sprd_cpufreq_verify_speed(struct cpufreq_policy *policy)
 	return cpufreq_frequency_table_verify(policy, sprd_cpufreq_conf->freq_tbl);
 }
 
-int cpufreq_min_limit = 600000;
-int cpufreq_max_limit = 1400000;
+int cpufreq_min_limit = 500000;
+int cpufreq_max_limit = 1200000;
 static DEFINE_SPINLOCK(cpufreq_state_lock);
 
 static int sprd_cpufreq_target(struct cpufreq_policy *policy,
