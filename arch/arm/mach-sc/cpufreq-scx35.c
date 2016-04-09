@@ -170,13 +170,15 @@ static struct cpufreq_table_data sc8830_cpufreq_table_data_cs = {
 		{1, 1200000},
 		{2, SHARK_TDPLL_FREQUENCY},
 		{3, SHARK_TDPLL_FREQUENCY/2},
-		{4, CPUFREQ_TABLE_END},
+		{4, SHARK_TDPLL_FREQUENCY/4},
+		{5, CPUFREQ_TABLE_END},
 	},
 	.vddarm_mv = {
 		1350000,
 		1250000,
 		1150000,
 		1100000,
+		1050000,
 		1000000,
 	},
 };
@@ -195,13 +197,15 @@ for 7715 test
 		{1, 1200000},
 		{2, SHARK_TDPLL_FREQUENCY},
 		{3, SHARK_TDPLL_FREQUENCY/2},
-		{4, CPUFREQ_TABLE_END},
+		{4, SHARK_TDPLL_FREQUENCY/4},
+		{5, CPUFREQ_TABLE_END},
 	},
 	.vddarm_mv = {
 		1350000,
 		1320000,
 		1200000,
 		1100000,
+		1050000,
 		1000000,
 	},
 };
@@ -421,8 +425,8 @@ static int sprd_cpufreq_verify_speed(struct cpufreq_policy *policy)
 	return cpufreq_frequency_table_verify(policy, sprd_cpufreq_conf->freq_tbl);
 }
 
-int cpufreq_min_limit = 600000;
-int cpufreq_max_limit = 1400000;
+int cpufreq_min_limit = 250000;
+int cpufreq_max_limit = 1200000;
 static DEFINE_SPINLOCK(cpufreq_state_lock);
 
 static int sprd_cpufreq_target(struct cpufreq_policy *policy,
@@ -651,7 +655,7 @@ static ssize_t cpufreq_max_limit_store(struct device *dev, struct device_attribu
 
 	/*
 	   for debug use
-	   echo 0xabcde4b0 > /sys/power/cpufreq_max_limit means set the maximum limit to 1200Mhz
+	   echo 0xabcde4b0 > /sys/power/cpufreq_max_limit means set the maximum limit to 1400Mhz
 	 */
 	if((value & 0xfffff000) == 0xabcde000)
 	{
