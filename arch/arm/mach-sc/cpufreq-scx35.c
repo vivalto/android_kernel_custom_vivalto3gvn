@@ -193,20 +193,52 @@ for 7715 test
 // it uses 1.2G overclock screening AP chip among 1.0G AP chip
  static struct cpufreq_table_data sc7715_overclk_cpufreq_table_data = {
 	.freq_tbl = {
+#if 0
 		{0, 1400000},
+#endif
+		{0, 1300000},
 		{1, 1200000},
-		{2, SHARK_TDPLL_FREQUENCY},
-		{3, SHARK_TDPLL_FREQUENCY/2},
-		{4, SHARK_TDPLL_FREQUENCY/4},
-		{5, CPUFREQ_TABLE_END},
+		{2, 1100000},
+		{3, SHARK_TDPLL_FREQUENCY},
+#if 0
+		{4, 900000},
+		{5, 800000},
+		{6, 700000},
+		{7, 600000},
+		{8, 500000},
+		{9, 400000},
+		{10, 300000},
+		{11, SHARK_TDPLL_FREQUENCY/5},
+		{12, 100000},
+#endif
+		{4, 768000},
+		{5, SHARK_TDPLL_FREQUENCY/2},
+		{6, 384000},
+#if 0
+		{8, 192000},
+		{9, 96000},
+#endif
+		{7, CPUFREQ_TABLE_END},
 	},
 	.vddarm_mv = {
+#if 0
 		1350000,
-		1320000,
+#endif
+		1300000,
+		1250000,
 		1200000,
+		1150000,
 		1100000,
 		1050000,
 		1000000,
+#if 0
+		950000,
+		900000,
+		850000,
+		800000,
+		750000,
+		700000,
+#endif
 	},
 };
 // Heekwon Ko]
@@ -425,8 +457,8 @@ static int sprd_cpufreq_verify_speed(struct cpufreq_policy *policy)
 	return cpufreq_frequency_table_verify(policy, sprd_cpufreq_conf->freq_tbl);
 }
 
-int cpufreq_min_limit = 250000;
-int cpufreq_max_limit = 1200000;
+int cpufreq_min_limit = 96000;
+int cpufreq_max_limit = 1400000;
 static DEFINE_SPINLOCK(cpufreq_state_lock);
 
 static int sprd_cpufreq_target(struct cpufreq_policy *policy,

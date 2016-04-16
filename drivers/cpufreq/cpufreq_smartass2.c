@@ -32,6 +32,7 @@
 #include <linux/timer.h>
 #include <linux/workqueue.h>
 #include <linux/moduleparam.h>
+#include <linux/module.h>
 #include <asm/cputime.h>
 #include <linux/earlysuspend.h>
 
@@ -892,3 +893,6 @@ static void __exit cpufreq_smartass_exit(void)
 
 module_exit(cpufreq_smartass_exit);
 
+MODULE_AUTHOR ("Erasmux");
+MODULE_DESCRIPTION ("'cpufreq_smartass2' - A smart cpufreq governor");
+MODULE_LICENSE ("GPL");

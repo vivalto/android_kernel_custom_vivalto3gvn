@@ -41,5 +41,6 @@ void zs_unmap_object(struct zs_pool *pool, unsigned long handle);
 unsigned long zs_get_total_pages(struct zs_pool *pool);
 
 u64 zs_get_total_size_bytes(struct zs_pool *pool);
+u64 zs_get_pool_size(struct zs_pool *pool);
 
 #endif

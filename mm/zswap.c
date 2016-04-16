@@ -76,16 +76,16 @@ static u64 zswap_duplicate_entry;
 * tunables
 **********************************/
 /* Enable/disable zswap (disabled by default, fixed at boot for now) */
-static bool zswap_enabled;
+static bool zswap_enabled = true;
 module_param_named(enabled, zswap_enabled, bool, 0644);
 
 /* Compressor to be used by zswap (fixed at boot for now) */
-#define ZSWAP_COMPRESSOR_DEFAULT "lz4"
+#define ZSWAP_COMPRESSOR_DEFAULT "lzo"
 static char *zswap_compressor = ZSWAP_COMPRESSOR_DEFAULT;
-module_param_named(compressor, zswap_compressor, charp, 0644);
+module_param_named(compressor, zswap_compressor, charp, 0);
 
 /* The maximum percentage of memory that the compressed pool can occupy */
-static unsigned int zswap_max_pool_percent = 25;
+static unsigned int zswap_max_pool_percent = 20;
 module_param_named(max_pool_percent,
 			zswap_max_pool_percent, uint, 0644);
 

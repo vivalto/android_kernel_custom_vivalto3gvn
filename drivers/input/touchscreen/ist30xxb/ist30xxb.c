@@ -28,6 +28,12 @@
 #include <mach/gpio.h>
 
 #include <linux/input/mt.h>
+#ifdef CONFIG_TOUCHSCREEN_PREVENT_SLEEP
+#ifdef CONFIG_TOUCHSCREEN_DOUBLETAP2WAKE
+#include <linux/input/doubletap2wake.h>
+#endif
+#endif
+
 #include <mach/i2c-sprd.h>
 #include <linux/input/ist30xxb.h>
 #include "ist30xxb_update.h"
@@ -147,6 +153,22 @@ int ist30xx_intr_wait(long ms)                            // int ist30xx_intr_wa
 
 void ist30xx_disable_irq(struct ist30xx_data *data)
 {
+
+#ifdef CONFIG_TOUCHSCREEN_PREVENT_SLEEP
+#if defined(CONFIG_TOUCHSCREEN_SWEEP2WAKE) || defined(CONFIG_TOUCHSCREEN_DOUBLETAP2WAKE)
+	bool prevent_sleep = false;
+#endif
+#if defined(CONFIG_TOUCHSCREEN_DOUBLETAP2WAKE)
+	prevent_sleep = prevent_sleep || (dt2w_switch > 0);
+#endif
+#endif
+
+#ifdef CONFIG_TOUCHSCREEN_PREVENT_SLEEP
+	if (prevent_sleep) {
+		enable_irq_wake(data->client->irq);
+	} else {
+#endif
+
 	if (data->irq_enabled) {
 		ist30xx_tracking(TRACK_INTR_DISABLE);
 		disable_irq(data->client->irq);
@@ -154,10 +176,31 @@ void ist30xx_disable_irq(struct ist30xx_data *data)
 		data->irq_enabled = 0;
 		data->status.event_mode = false;
 	}
+
+#ifdef CONFIG_TOUCHSCREEN_PREVENT_SLEEP
+	} //prevent_sleep
+#endif
+
 }
 
 void ist30xx_enable_irq(struct ist30xx_data *data)
 {
+
+#ifdef CONFIG_TOUCHSCREEN_PREVENT_SLEEP
+#if defined(CONFIG_TOUCHSCREEN_SWEEP2WAKE) || defined(CONFIG_TOUCHSCREEN_DOUBLETAP2WAKE)
+	bool prevent_sleep = false;
+#endif
+#if defined(CONFIG_TOUCHSCREEN_DOUBLETAP2WAKE)
+	prevent_sleep = prevent_sleep || (dt2w_switch > 0);
+#endif
+#endif
+
+#ifdef CONFIG_TOUCHSCREEN_PREVENT_SLEEP
+	if (prevent_sleep) {
+		disable_irq_wake(data->client->irq);
+	} else {
+#endif
+
 	if (!data->irq_enabled) {
 		ist30xx_tracking(TRACK_INTR_ENABLE);
 		enable_irq(data->client->irq);
@@ -166,6 +209,11 @@ void ist30xx_enable_irq(struct ist30xx_data *data)
 		data->irq_enabled = 1;
 		data->status.event_mode = true;
 	}
+
+#ifdef CONFIG_TOUCHSCREEN_PREVENT_SLEEP
+	} //prevent_sleep
+#endif
+
 }
 
 
@@ -1208,7 +1256,11 @@ static int ist30xx_probe(struct i2c_client *		client,
 	client->irq = gpio_to_irq(pdata->gpio);
 	printk("[TSP] client->irq : %d\n", client->irq);
 	ret = request_threaded_irq(client->irq, NULL, ist30xx_irq_thread,
+#ifdef CONFIG_TOUCHSCREEN_PREVENT_SLEEP
+				   IRQF_TRIGGER_FALLING | IRQF_ONESHOT | IRQF_NO_SUSPEND, "ist30xx_ts", data);
+#else
 				   IRQF_TRIGGER_FALLING | IRQF_ONESHOT, "ist30xx_ts", data);
+#endif
 	if (ret)
 		goto err_irq;
 	sprd_i2c_ctl_chg_clk(1, 400000); // up h/w i2c 1 400k

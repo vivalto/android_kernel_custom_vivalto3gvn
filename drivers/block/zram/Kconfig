@@ -6,6 +6,7 @@ config ZRAM
 	select LZO_COMPRESS
 	select LZO_DECOMPRESS
 	select ZRAM_LZ4_COMPRESS
+	select ZRAM_ZLIB_COMPRESS
 	default n
 	help
 	  Creates virtual block devices called /dev/zramX (X = 0, 1, ...).
@@ -22,12 +23,24 @@ config ZRAM_LZ4_COMPRESS
 	bool "Enable LZ4 algorithm support"
 	depends on ZRAM
 	select LZ4_COMPRESS
-	select LZ4HC_COMPRESS
 	select LZ4_DECOMPRESS
 	default n
 	help
-	  This option enables LZ4 compression algorithm support. Compression
-	  algorithm can be changed using `comp_algorithm' device attribute.
+	  This option enables LZ4 and LZ4HC compression algorithm support. 
+	  Compression algorithm can be changed using `comp_algorithm' 
+	  device attribute.
+
+config ZRAM_ZLIB_COMPRESS
+	bool "Enable ZLIB algorithm support"
+	depends on ZRAM
+	select ZLIB_INFLATE
+	select ZLIB_DEFLATE
+	default n
+	help
+	  This option enables ZLIB compression algorithm support. ZLIB gives
+	  a significantly better compression ratio, at a price of significantly
+	  worse performance. Compression algorithm can be changed using
+	  `comp_algorithm' device attribute.
 
 config ZRAM_DEBUG
 	bool "Compressed RAM block device debug support"
