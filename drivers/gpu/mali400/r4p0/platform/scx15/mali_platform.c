@@ -39,7 +39,7 @@
 #define GPU_FIX_312MHZ	1
 
 #define GPU_MIN_DIVISION	1
-#define GPU_MAX_DIVISION	1
+#define GPU_MAX_DIVISION	2
 
 #define GPU_SELECT0_VAL		0
 #define GPU_SELECT0_MAX		208000
@@ -408,7 +408,7 @@ void mali_platform_utilization(struct mali_gpu_utilization_data *data)
 			{
 				gpu_max_freq=GPU_SELECT3_MAX;
 				min_div=GPU_MIN_DIVISION;
-				max_div=GPU_MIN_DIVISION;
+				max_div=GPU_MAX_DIVISION;
 			}
 			else
 			{
@@ -429,7 +429,7 @@ void mali_platform_utilization(struct mali_gpu_utilization_data *data)
 			{
 				gpu_max_freq=GPU_SELECT3_MAX;
 				min_div=GPU_MIN_DIVISION;
-				max_div=GPU_MIN_DIVISION;
+				max_div=GPU_MAX_DIVISION;
 			}
 			else
 			{
@@ -453,7 +453,7 @@ void mali_platform_utilization(struct mali_gpu_utilization_data *data)
 			{
 				gpu_max_freq=GPU_SELECT3_MAX;
 				min_div=GPU_MIN_DIVISION;
-				max_div=GPU_MIN_DIVISION;
+				max_div=GPU_MAX_DIVISION;
 			}
 			else
 			{
@@ -467,7 +467,7 @@ void mali_platform_utilization(struct mali_gpu_utilization_data *data)
 	}
 
 	// if the loading ratio is greater then 90%, switch the clock to the maximum
-	if(utilization >= (256*9/10))
+	if(utilization >= (GPU_SELECT3_MAX*9/10))
 	{
 		gpu_clock_div = min_div;
 	}
@@ -478,14 +478,14 @@ void mali_platform_utilization(struct mali_gpu_utilization_data *data)
 			utilization = 1;
 		}
 
-		// the absolute loading ratio is 1/gpu_clock_div * utilization/256
+		// the absolute loading ratio is 1/gpu_clock_div * utilization/312
 		// to keep the loading ratio above 70% at a certain level,
-		// the absolute loading level is ceil(1/(1/gpu_clock_div * utilization/256 / (7/10)))
-		gpu_clock_div = gpu_clock_div*(256*7/10)/utilization + 1;
+		// the absolute loading level is ceil(1/(1/gpu_clock_div * utilization/312 / (7/10)))
+		gpu_clock_div = gpu_clock_div*(GPU_SELECT3_MAX*7/10)/utilization + 1;
 
 		// if the 90% of max loading ratio of new level is smaller than the current loading ratio, shift up
 		// 1/old_div * utilization/256 > 1/gpu_clock_div * 90%
-		if(gpu_clock_div*utilization > old_gpu_clock_div*256*9/10)
+		if(gpu_clock_div*utilization > old_gpu_clock_div*GPU_SELECT3_MAX*9/10)
 			gpu_clock_div--;
 
 		if(gpu_clock_div < min_div) gpu_clock_div = min_div;

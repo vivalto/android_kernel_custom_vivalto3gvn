@@ -746,7 +746,7 @@ static void zram_reset_device(struct zram *zram, bool reset_capacity)
 	}
 
 	zcomp_destroy(zram->comp);
-	zram->max_comp_streams = 5;
+	zram->max_comp_streams = 1;
 
 	zram_meta_free(zram->meta);
 	zram->meta = NULL;
@@ -1015,6 +1015,7 @@ static struct attribute_group zram_disk_attr_group = {
 
 static int create_device(struct zram *zram, int device_id)
 {
+	//int disksize;
 	int ret = -ENOMEM;
 
 	init_rwsem(&zram->init_lock);
@@ -1042,6 +1043,9 @@ static int create_device(struct zram *zram, int device_id)
 	zram->disk->fops = &zram_devops;
 	zram->disk->queue = zram->queue;
 	zram->disk->private_data = zram;
+
+	//disksize += (totalram_pages * 70 / 100);
+	//zram->disksize = disksize;
 	snprintf(zram->disk->disk_name, 16, "zram%d", device_id);
 
 	/* Actual capacity set using syfs (/sys/block/zram<id>/disksize */
@@ -1083,7 +1087,7 @@ static int create_device(struct zram *zram, int device_id)
 	}
 	strlcpy(zram->compressor, default_compressor, sizeof(zram->compressor));
 	zram->meta = NULL;
-	zram->max_comp_streams = 5;
+	zram->max_comp_streams = 1;
 	return 0;
 
 out_free_disk:
@@ -1176,7 +1180,7 @@ static void __exit zram_exit(void)
 module_init(zram_init);
 module_exit(zram_exit);
 
-module_param(num_devices, uint, 0);
+module_param(num_devices, uint, 0644);
 MODULE_PARM_DESC(num_devices, "Number of zram devices");
 
 MODULE_LICENSE("Dual BSD/GPL");
