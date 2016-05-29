@@ -193,37 +193,18 @@ for 7715 test
 // it uses 1.2G overclock screening AP chip among 1.0G AP chip
  static struct cpufreq_table_data sc7715_overclk_cpufreq_table_data = {
 	.freq_tbl = {
-#if 0
 		{0, 1400000},
-#endif
-		{0, 1300000},
-		{1, 1200000},
-		{2, 1100000},
-		{3, SHARK_TDPLL_FREQUENCY},
-#if 0
-		{4, 900000},
-		{5, 800000},
-		{6, 700000},
-		{7, 600000},
-		{8, 500000},
-		{9, 400000},
-		{10, 300000},
-		{11, SHARK_TDPLL_FREQUENCY/5},
-		{12, 100000},
-#endif
-		{4, 768000},
-		{5, SHARK_TDPLL_FREQUENCY/2},
-		{6, 384000},
-#if 0
-		{8, 192000},
-		{9, 96000},
-#endif
-		{7, CPUFREQ_TABLE_END},
+		{1, 1300000},
+		{2, 1200000},
+		{3, 1100000},
+		{4, SHARK_TDPLL_FREQUENCY},
+		{5, 768000},
+		{6, SHARK_TDPLL_FREQUENCY/2},
+		{7, 384000},
+		{8, CPUFREQ_TABLE_END},
 	},
 	.vddarm_mv = {
-#if 0
 		1350000,
-#endif
 		1300000,
 		1250000,
 		1200000,
@@ -231,14 +212,6 @@ for 7715 test
 		1100000,
 		1050000,
 		1000000,
-#if 0
-		950000,
-		900000,
-		850000,
-		800000,
-		750000,
-		700000,
-#endif
 	},
 };
 // Heekwon Ko]
