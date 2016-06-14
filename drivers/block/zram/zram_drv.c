@@ -38,10 +38,10 @@
 /* Globals */
 static int zram_major;
 static struct zram *zram_devices;
-static const char *default_compressor = "lz4hc";
+static const char *default_compressor = "lzo";
 
 /* Module params (documentation at end) */
-static unsigned int num_devices = 1;
+static unsigned int num_devices = 2;
 
 #define ZRAM_ATTR_RO(name)						\
 static ssize_t zram_attr_##name##_show(struct device *d,		\
@@ -315,9 +315,10 @@ static void zram_meta_free(struct zram_meta *meta)
 	kfree(meta);
 }
 
-static struct zram_meta *zram_meta_alloc(u64 disksize)
+static struct zram_meta *zram_meta_alloc(int device_id, u64 disksize)
 {
 	size_t num_pages;
+	char pool_name[8];
 	struct zram_meta *meta = kmalloc(sizeof(*meta), GFP_KERNEL);
 	if (!meta)
 		goto out;
@@ -329,7 +330,8 @@ static struct zram_meta *zram_meta_alloc(u64 disksize)
 		goto free_meta;
 	}
 
-	meta->mem_pool = zs_create_pool(GFP_NOIO | __GFP_HIGHMEM);
+	snprintf(pool_name, sizeof(pool_name), "zram%d", device_id);
+	meta->mem_pool = zs_create_pool(pool_name, GFP_NOIO | __GFP_HIGHMEM);
 	if (!meta->mem_pool) {
 		pr_err("Error creating memory pool\n");
 		goto free_table;
@@ -416,7 +418,8 @@ static void zram_free_page(struct zram *zram, size_t index)
 	zram_set_obj_size(meta, index, 0);
 }
 
-static int zram_decompress_page(struct zram *zram, char *mem, u32 index)
+static int zram_decompress_page(struct zram *zram, struct zcomp_strm *zstrm,
+		char *mem, u32 index)
 {
 	int ret = 0;
 	unsigned char *cmem;
@@ -438,7 +441,7 @@ static int zram_decompress_page(struct zram *zram, char *mem, u32 index)
 	if (size == PAGE_SIZE)
 		copy_page(mem, cmem);
 	else
-		ret = zcomp_decompress(zram->comp, cmem, size, mem);
+		ret = zcomp_decompress(zram->comp, zstrm, cmem, size, mem);
 	zs_unmap_object(meta->mem_pool, handle);
 	bit_spin_unlock(ZRAM_ACCESS, &meta->table[index].value);
 
@@ -458,6 +461,7 @@ static int zram_bvec_read(struct zram *zram, struct bio_vec *bvec,
 	struct page *page;
 	unsigned char *user_mem, *uncmem = NULL;
 	struct zram_meta *meta = zram->meta;
+	void *dzstrm;
 	page = bvec->bv_page;
 
 	bit_spin_lock(ZRAM_ACCESS, &meta->table[index].value);
@@ -473,6 +477,7 @@ static int zram_bvec_read(struct zram *zram, struct bio_vec *bvec,
 		/* Use  a temporary buffer to decompress the page */
 		uncmem = kmalloc(PAGE_SIZE, GFP_NOIO);
 
+	dzstrm = zcomp_decompress_begin(zram->comp);
 	user_mem = kmap_atomic(page);
 	if (!is_partial_io(bvec))
 		uncmem = user_mem;
@@ -483,7 +488,11 @@ static int zram_bvec_read(struct zram *zram, struct bio_vec *bvec,
 		goto out_cleanup;
 	}
 
-	ret = zram_decompress_page(zram, uncmem, index);
+	ret = zram_decompress_page(zram, dzstrm, uncmem, index);
+
+	zcomp_decompress_end(zram->comp, dzstrm);
+	dzstrm = NULL;
+
 	/* Should NEVER happen. Return bio error if it does. */
 	if (unlikely(ret))
 		goto out_cleanup;
@@ -494,10 +503,13 @@ static int zram_bvec_read(struct zram *zram, struct bio_vec *bvec,
 
 	flush_dcache_page(page);
 	ret = 0;
+
 out_cleanup:
 	kunmap_atomic(user_mem);
+	zcomp_decompress_end(zram->comp, dzstrm);
 	if (is_partial_io(bvec))
 		kfree(uncmem);
+
 	return ret;
 }
 
@@ -531,6 +543,8 @@ static int zram_bvec_write(struct zram *zram, struct bio_vec *bvec, u32 index,
 
 	page = bvec->bv_page;
 	if (is_partial_io(bvec)) {
+		void *dzstrm;
+
 		/*
 		 * This is a partial IO. We need to read the full page
 		 * before to write the changes.
@@ -540,7 +554,10 @@ static int zram_bvec_write(struct zram *zram, struct bio_vec *bvec, u32 index,
 			ret = -ENOMEM;
 			goto out;
 		}
-		ret = zram_decompress_page(zram, uncmem, index);
+
+		dzstrm = zcomp_decompress_begin(zram->comp);
+		ret = zram_decompress_page(zram, dzstrm, uncmem, index);
+		zcomp_decompress_end(zram->comp, dzstrm);
 		if (ret)
 			goto out;
 	}
@@ -731,7 +748,7 @@ static void zram_reset_device(struct zram *zram, bool reset_capacity)
 	}
 
 	zcomp_destroy(zram->comp);
-	zram->max_comp_streams = 1;
+	zram->max_comp_streams = 5;
 
 	zram_meta_free(zram->meta);
 	zram->meta = NULL;
@@ -767,7 +784,7 @@ static ssize_t disksize_store(struct device *dev,
 		return -EINVAL;
 
 	disksize = PAGE_ALIGN(disksize);
-	meta = zram_meta_alloc(disksize);
+	meta = zram_meta_alloc(zram->disk->first_minor, disksize);
 	if (!meta)
 		return -ENOMEM;
 
@@ -1068,7 +1085,7 @@ static int create_device(struct zram *zram, int device_id)
 	}
 	strlcpy(zram->compressor, default_compressor, sizeof(zram->compressor));
 	zram->meta = NULL;
-	zram->max_comp_streams = 1;
+	zram->max_comp_streams = 5;
 	return 0;
 
 out_free_disk:

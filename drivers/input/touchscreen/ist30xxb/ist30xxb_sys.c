@@ -25,6 +25,11 @@
 #include <linux/err.h>
 #include <mach/regulator.h>
 #include <linux/input/ist30xxb.h>
+#ifdef CONFIG_TOUCHSCREEN_PREVENT_SLEEP
+#ifdef CONFIG_TOUCHSCREEN_DOUBLETAP2WAKE
+#include <linux/input/doubletap2wake.h>
+#endif
+#endif
 #include "ist30xxb_tracking.h"
 /******************************************************************************
  * Return value of Error
@@ -305,6 +310,19 @@ int ist30xx_power_on(void)
 
 int ist30xx_power_off(void)
 {
+#ifdef CONFIG_TOUCHSCREEN_PREVENT_SLEEP
+#if defined(CONFIG_TOUCHSCREEN_SWEEP2WAKE) || defined(CONFIG_TOUCHSCREEN_DOUBLETAP2WAKE)
+	bool prevent_sleep = false;
+#endif
+#if defined(CONFIG_TOUCHSCREEN_DOUBLETAP2WAKE)
+	prevent_sleep = prevent_sleep || (dt2w_switch > 0);
+#endif
+#endif
+#ifdef CONFIG_TOUCHSCREEN_PREVENT_SLEEP
+	if (prevent_sleep) {
+		; // do nothing
+	} else { // power off screen.
+#endif
 	if (ts_data->status.power != 0) {
 		tsp_info("%s()\n", __func__);
 		ist30xx_tracking(TRACK_PWR_OFF);
@@ -316,6 +334,9 @@ int ist30xx_power_off(void)
 		ts_data->status.power = 0;
 		ts_data->status.noise_mode = false;
 	}
+#ifdef CONFIG_TOUCHSCREEN_PREVENT_SLEEP
+	} //prevent_sleep
+#endif
 
 	return 0;
 }

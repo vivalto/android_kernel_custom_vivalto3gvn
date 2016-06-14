@@ -194,16 +194,21 @@ for 7715 test
  static struct cpufreq_table_data sc7715_overclk_cpufreq_table_data = {
 	.freq_tbl = {
 		{0, 1400000},
-		{1, 1200000},
-		{2, SHARK_TDPLL_FREQUENCY},
-		{3, SHARK_TDPLL_FREQUENCY/2},
-		{4, SHARK_TDPLL_FREQUENCY/4},
-		{5, CPUFREQ_TABLE_END},
+		{1, 1300000},
+		{2, 1200000},
+		{3, 1100000},
+		{4, SHARK_TDPLL_FREQUENCY},
+		{5, 768000},
+		{6, SHARK_TDPLL_FREQUENCY/2},
+		{7, 384000},
+		{8, CPUFREQ_TABLE_END},
 	},
 	.vddarm_mv = {
 		1350000,
-		1320000,
+		1300000,
+		1250000,
 		1200000,
+		1150000,
 		1100000,
 		1050000,
 		1000000,
@@ -425,8 +430,8 @@ static int sprd_cpufreq_verify_speed(struct cpufreq_policy *policy)
 	return cpufreq_frequency_table_verify(policy, sprd_cpufreq_conf->freq_tbl);
 }
 
-int cpufreq_min_limit = 250000;
-int cpufreq_max_limit = 1200000;
+int cpufreq_min_limit = 96000;
+int cpufreq_max_limit = 1400000;
 static DEFINE_SPINLOCK(cpufreq_state_lock);
 
 static int sprd_cpufreq_target(struct cpufreq_policy *policy,

@@ -1,1 +1,1 @@
-make another_defconfig && make -j2
+make another_defconfig && make $1
